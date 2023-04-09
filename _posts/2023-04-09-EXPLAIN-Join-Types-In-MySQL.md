@@ -7,9 +7,9 @@ tags: [mysql, explain, type, mysql性能分析]
 math: true
 mermaid: true
 ---
-众所周知SQL性能调优的依据就是`EXPLAIN`，其中`type`对结果影响最大。本文结合MySQL8.0官方文档中对[EXPLAIN Output Format](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)的说明以及其他网上其他文章，试图对该工具进行简明扼要的阐述。(本文实例环境为MySQL8.0.32，不再赘述)
+众所周知SQL性能调优的依据就是`EXPLAIN`，其中`type`对结果影响最大。本文结合MySQL8.0官方文档中对 [EXPLAIN Output Format](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html) 的说明以及其他网上其他文章，试图对该工具进行简明扼要的阐述。(本文实例环境为MySQL8.0.32，不再赘述)
 
-## `type` 概述
+## **type** 概述
 
 > The type column of EXPLAIN output describes ***how tables are joined***.
 
@@ -34,7 +34,7 @@ MySQL的官网解释非常简洁，只用了3个单词：连接类型(the join t
 
 ## **system**
 
-> The table has <mark>***only one row***</mark>(= system table). This is a <mark>special case of the `const`</mark> join type.
+> The table has <mark>only one row</mark>(= system table). This is a <mark>special case of the `const`</mark> join type.
 
 特点简单概括如下：
 
@@ -42,7 +42,7 @@ MySQL的官网解释非常简洁，只用了3个单词：连接类型(the join t
 - 是const类型的一个特殊情况
 - 需要存储引擎具有统计精确性，即执行`const(*)`无需遍历（目前InnoDB已经没有，在MyISAM可以）
 
-```SQL
+```
 > CREATE TABLE test_innodb ( `uid` INT ) ENGINE=InnoDB;
 > CREATE TABLE test_myisam ( `uid` INT ) ENGINE=MyISAM;
 
