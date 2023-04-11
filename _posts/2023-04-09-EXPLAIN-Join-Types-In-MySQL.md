@@ -204,7 +204,7 @@ unique_query针对包含IN语句的子查询且子查询中使用了主键索引
 
 范围查询，使用了诸如`=, <>, >, >=, <, <=, IS NULL, <=>, BETWEEN, LIKE, or IN()`的运算符：
 
-```Sql
+```sql
 SELECT * FROM tbl_name
   WHERE key_column = 10;
 
