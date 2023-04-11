@@ -12,6 +12,7 @@ mermaid: true
 ## **type** 概述
 
 > The type column of EXPLAIN output describes ***how tables are joined***.
+{: .prompt-tip }
 
 MySQL的官网解释非常简洁，只用了3个单词：连接类型(the join type)。它描述了找到所需数据使用的扫描方式。
 
@@ -42,7 +43,7 @@ MySQL的官网解释非常简洁，只用了3个单词：连接类型(the join t
 - 是const类型的一个特殊情况
 - 需要存储引擎具有统计精确性，即执行`const(*)`无需遍历（目前InnoDB已经没有，在MyISAM可以）
 
-```
+```sql
 > CREATE TABLE test_innodb ( `uid` INT ) ENGINE=InnoDB;
 > CREATE TABLE test_myisam ( `uid` INT ) ENGINE=MyISAM;
 
@@ -152,6 +153,7 @@ SELECT * FROM ref_table,other_table
 ## **fulltext**
 >
 > The join is performed using a FULLTEXT index.
+{: .prompt-tip }
 
 没什么好说的。
 
