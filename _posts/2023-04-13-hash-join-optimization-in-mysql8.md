@@ -72,7 +72,7 @@ build阶段关键操作：
 - 对**驱动表的连接条件**（此案例中假定驱动表为countries）作为key进行散列运算（`hash(countries.country_id)`）建立散列表
 - **散列表存储在内存中**，建立过程中将查询需要的列作为value放入散列表对应key的位置（在图中示例为country_name），直到驱动表中所有rows存入散列表
 
-![Image.tiff](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/64FAACF0-6FFD-4604-BDEF-3E22C97DD4D5_2/5Y2Pa23RVjqu3MJoFFBcggxabWyxKYO2dyKQZXYDutAz/Image.tiff)
+![build-phase-1.jpeg](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/7FE37028-F889-45B8-9666-9A50E32F1972_2/xnSghFGuICp5I3Pyrbw000tMm8DciIQHo22esnkI1F4z/build-phase-1.jpeg)
 
 > This input is also known as the build input, and let us assume that *‘countries’* is designated as the build input. Ideally, the server will **choose the smaller of the two inputs as the build input** (measured **in bytes**, not number of rows). Since *‘countries.country_id’* is the join condition that belongs to the build input, this is used as the key in the hash table. Once all the rows has been stored in the hash table, the build phase is done.
 {: .prompt-tip }
@@ -92,7 +92,7 @@ build阶段完成后，MySQL逐行遍历被驱动表，然后计算 join条件�
 
 关于最终开销：**每个连接表只需要扫描一次**，并且连接条件的匹配得益于Hash算法只需O(1)的时间复杂度。所以对于内存足够存放整个散列的情况Hash Join具有非常好的效率。
 
-![Image.tiff](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/1C9F472E-4D27-4EE8-BC29-2EC901E405BF_2/9hezptv677rlvIqoPy5bM1xcmb7xCj1jC77fkCGAgN4z/Image.tiff)
+![probe-phase-1.jpeg](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/C4BC36F9-4A24-4FFC-8101-3EC5BE559C26_2/Ndl8317luwxUDgQaafD8OcIqySCvRHgjttABlXMS5iQz/probe-phase-1.jpeg)
 
 ### 溢出至磁盘情况（Spill to disk）
 
@@ -111,7 +111,7 @@ hash join 构建hash表的大小是由参数`join_buffer_size` 控制的，实�
 - 每一行写入哪一块取决于连接属性的散列值
 - 注意到此处的散列函数与非溢出阶段的散列函数不同
 
-![Image.tiff](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/B56627C3-9AD8-4F47-85D0-55AC04F63A8F_2/6kWOurM9ODBikGIeEc2enWCyswEypyFkosVvRVYlozMz/Image.tiff)
+![build-phase-on-disk-1.jpeg](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/77F32BED-D6A9-4A88-8A0B-A0E9A33E2CD0_2/k3abtVmcxx8iqyG5tMY30up2BugCUxmCkXpqGmtVj5Ez/build-phase-on-disk-1.jpeg)
 
 #### probe phase
 
@@ -123,7 +123,8 @@ hash join 构建hash表的大小是由参数`join_buffer_size` 控制的，实�
 - 被驱动表中的每一行记录都使用相同的散列函数写入到磁盘块中（这里对应的为`hash2()`函数），因为被驱动表的记录既可能与内存中的散列表匹配，也可能与磁盘块上的key匹配
 - 由于散列函数相同，所以build阶段与probe阶段满足连接条件的记录必定位于相同的块编号中
 
-![Image.tiff](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/9D4070E3-9906-4B74-8E17-90E1B2663C72_2/4p52Wbx6g2nH5ePPkb7ePZuTVaQLcTzMwyxe5oyZIU8z/Image.tiff)
+![probe-phase-on-disk.jpeg](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/7E694357-4DF8-437C-8A91-B7B6CA7FD301_2/DZmF6erS8Vl8RrKPQAVeq7nSxSyqyLMJNbXuASRZv20z/probe-phase-on-disk.jpeg)
+
 
 #### 读取块文件
 
@@ -142,5 +143,4 @@ hash join 构建hash表的大小是由参数`join_buffer_size` 控制的，实�
 - 两次读I/O（进行散列运算以及载入至内存两次）
 - 一次写I/O（因内存不足而散列后写入对应编号的磁盘块中）
 
-![Image.tiff](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/4B3C061B-C8EC-4F7B-B91B-980D2DAE1548_2/V5oS447xWu3zy1kKHr8pGyywxBCy3buQlB74syyJgZIz/Image.tiff)
-
+![build-and-probe-with-chunk-files-1.jpeg](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/0421481B-0DA2-4C1E-A28D-8EBD158B4337/D72B8BF9-BD18-4319-BBEC-4B6AC14D678A_2/3TgtuZ5OFkimPeaBT8SQmprlswmyy9XyPDXf8z2lSk0z/build-and-probe-with-chunk-files-1.jpeg)
