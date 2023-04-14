@@ -3,7 +3,7 @@ title: Hash Join Optimization in MySQL8
 author: mingqing
 date: 2023-04-13 16:13:00 +0800
 categories: [DataBase, MySQL]
-tags: [mysql, hash join, mysql性能分析]
+tags: [mysql, join, optimization]
 math: true
 mermaid: true
 ---

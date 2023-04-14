@@ -3,7 +3,7 @@ title: MySQL中EXPLAIN输出type列解析
 author: mingqing
 date: 2023-04-09 14:01:00 +0800
 categories: [DataBase, MySQL]
-tags: [mysql, explain, type, mysql性能分析]
+tags: [mysql, explain, type]
 math: true
 mermaid: true
 ---
