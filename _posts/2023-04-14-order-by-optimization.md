@@ -7,7 +7,7 @@ tags: [mysql, order by, optimization]
 math: true
 mermaid: true
 ---
-本文结合[官方文档](https://dev.mysql.com/doc/refman/8.0/en/order-by-optimization.html)对MySQL优化器使用索引或`filesort`等方式对`ORDER BY`语句进行查询优化对原理简单剖析。
+本文结合[官方文档](https://dev.mysql.com/doc/refman/8.0/en/order-by-optimization.html)对对`ORDER BY`语句使用索引或`filesort`等方式进行排序优化的原理进行简单剖析。
 
 ## 使用索引
 
@@ -29,7 +29,7 @@ mermaid: true
 CREATE INDEX idx_key1_key2 ON t1(key_part1, key_part2)
 ```
 
-1. `SELECT * ... ORDER BY`
+- `SELECT * ... ORDER BY`
 
 ```sql
 SELECT * FROM t1
@@ -44,7 +44,7 @@ SELECT pk, key_part1, key_part2 FROM t1
   ORDER BY key_part1, key_part2;
 ```
 
-2. `WHERE key_part1 = const`
+- `WHERE key_part1 = const`
 
 ```sql
 SELECT * FROM t1
@@ -53,7 +53,7 @@ SELECT * FROM t1
 ```
 由于`ORDER BY`语句的执行顺序比较靠后，如果`WHERE`语句筛选后的行数比较小，那么使用索引筛选后的页中`key_part2`本身就是有序的。此时即使回表开销也很可能比全表扫描开销小。
 
-3. `DESC`
+- `DESC`
 
 如果是`DESC`的条件如果在索引树中可以反向扫描的话那么与前述分析没有本质的区别，总之`ORDER BY`中无论是否`DESC`，只需与`INDEX`中保持一致性即可：
 
@@ -66,7 +66,7 @@ SELECT * FROM t1
   ORDER BY key_part2 DESC;
 ```
 
-4. `WHERE key_part1 > const`
+- `WHERE key_part1 > const`
 
 >  The index is used if the WHERE clause is selective enough to make an index range scan cheaper than a table scan
 {: .prompt-tip }
@@ -87,42 +87,42 @@ SELECT * FROM t1
 
 在某些情况下，MySQL不能使用索引来解析`ORDER BY`，即使可能会使用这些索引来查找`WHERE`子句中的匹配行。
 
-1. `ORDER BY`中字段属于不同的索引
+- `ORDER BY`中字段属于不同的索引
 
 ```sql
 SELECT * FROM t1 ORDER BY key1, key2;
 ```
 
-2. `ORDER BY`中字段在联合索引中不连续
+- `ORDER BY`中字段在联合索引中不连续
 
 ```sql
 SELECT * FROM t1 WHERE key2=constant ORDER BY key1_part1, key1_part3;
 ```
 
-3. `ORDER BY`中字段的索引与`WHERE`中筛选字段的索引不同
+- `ORDER BY`中字段的索引与`WHERE`中筛选字段的索引不同
 
 ```sql
 -- Using Index idx_key2, Using filesort
 SELECT * FROM t1 WHERE key2=constant ORDER BY key1;
 ```
 
-4. `ORDER BY`中包含列名以外的表达式
+- `ORDER BY`中包含列名以外的表达式
 
 ```sql
 SELECT * FROM t1 ORDER BY ABS(key);
 SELECT * FROM t1 ORDER BY -key;
 ```
 
-5. `ORDER BY`与`GROUP BY`中查询不同的字段
+- `ORDER BY`与`GROUP BY`中查询不同的字段
 
-6. `ORDER BY`中字段使用的索引为前缀索引
+- `ORDER BY`中字段使用的索引为前缀索引
 
 > There is an index on only a prefix of a column named in the ORDER BY clause. In this case, the index cannot be used to fully resolve the sort order. For example, if only the first 10 bytes of a CHAR(20) column are indexed, the index cannot distinguish values past the 10th byte and a filesort is needed.
 {: .prompt-tip }
 
 如某字段属性为`CHAR(20)`， 但以该字段的前缀建立索引如`CHAR(10)`的情况下，`ORDER BY`中出现该字段则无法使用该字段对应的索引。
 
-7. 未按序存储的索引如`HASH`索引
+- 未按序存储的索引如`HASH`索引
 
 ### 列别名使得索引实效的情况
 
@@ -179,6 +179,20 @@ SELECT col1, ... FROM t1 ... ORDER BY RAND() LIMIT 15;
 
 如果不能使用索引，那么可以考虑如下策略：
 
-- 增大`sort_buffer_size`：使得内存能够容纳排序的整个结果集，避免多余的磁盘读写
+- 增大`sort_buffer_size`：使得内存能够容纳排序的整个结果集，避免多余的磁盘读写。
 
-- 
+  - 需要注意的是，`sort_buffer`中列值的大小还受到参数`max_sort_length`的影响。特别是对于存储了较长字符串的列，除了增大`sort_buffer_size`之外，也需要增加`max_sort_length`。
+
+- 增大`read_rnd_buffer_size`：使得一次读取能够读更多行。
+
+- 改变系统变量`tmpdir`使其指向更大专用空闲空间，变量值可以列出多条路径来采用`round-robin`算法来循环使用。
+
+## 含`ORDER BY`的执行计划信息
+
+通过性能分析工具`EXPLAIN`的输出结果中的`Extra`列，可以检查`ORDER BY`语句使用了何种优化：
+
+- 如果不包含`Using filesort`：那么使用了索引，不执行文件排序
+
+- 如果包含了`Using filesort`：那么使用了文件排序，而不使用索引
+
+最后说明下，`EXPLAIN`工具并不会区别`filesort`是否是在内存中完成的，可以通过在`optimizer trace output`中查看`filesort_priority_queue_optimization`来分析`in-memory filesort`的使用情况。
