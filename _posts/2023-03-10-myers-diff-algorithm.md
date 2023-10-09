@@ -2,7 +2,7 @@
 title: Myers Diff Algorithm
 author: mingqing
 date: 2023-03-10 15:13:00 +0800
-categories: [Algorithm, Dynamic Programming]
+categories: [Algorithm]
 tags: [myers, diff, algorithm, lcs, git]
 math: true
 mermaid: true

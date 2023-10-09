@@ -2,8 +2,8 @@
 title: Mybatis Plus 实现支持null字段全量更新
 author: mingqing
 date: 2023-10-09 13:21:00 +0800
-categories: [Mybatis]
-tags: [SqlInjection, Wrapper]
+categories: [ORM, Mybatis]
+tags: [mybatis, sql injection, wrapper]
 math: true
 mermaid: true
 ---
