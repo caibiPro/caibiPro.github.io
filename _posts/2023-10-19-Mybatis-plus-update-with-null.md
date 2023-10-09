@@ -160,7 +160,7 @@ public interface CommonMapper <T> extends BaseMapper<T> {
 
 别忘了将自定义的注入类加入到IOC容器中
 
-```Java
+```java
 public class CustomSqlInjector extends AbstractSqlInjector {
   @Override
   public List<AbstractMethod> getMethodList() {
