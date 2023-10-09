@@ -115,7 +115,7 @@ userService.update(WrappersFactory.updateWithNullField(user).eq(User::getId, use
 
 可以看到这段代码的逻辑中有一行`fieldFill`判断，为`update`或者`insert_update`时不进行`if`包裹。我们能可以利用这个特性。直接将需要的非公共字段全部设置为`FieldFill.UPDATE`即可。
 
-``` JAva
+``` java
 @Slf4j
 public class UpdateWithNull extends AbstractMethod {
   @Override
@@ -152,14 +152,7 @@ public class UpdateWithNull extends AbstractMethod {
 ```java
 public interface CommonMapper <T> extends BaseMapper<T> {
 
-  /**
-   * 根据 whereEntity 条件，更新记录
-   *
-   * @param entity        实体对象 (set 条件值,可以为 null)
-   * @param updateWrapper 实体对象封装操作类（可以为 null,里面的 entity 用于生成 where 语句）
-   */
   int updateWithNull(@Param(Constants.ENTITY) T entity, @Param(Constants.WRAPPER) Wrapper<T> updateWrapper);
-
 }
 ```
 
@@ -194,6 +187,3 @@ public class CustomSqlInjector extends AbstractSqlInjector {
   }
 }
 ```
-
-
-
