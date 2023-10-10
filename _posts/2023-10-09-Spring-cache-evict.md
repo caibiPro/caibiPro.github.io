@@ -29,18 +29,15 @@ redis 的查询和删除都可以做模糊匹配，所以如何让`@CacheEvict`�
 ```java
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
 
-	@Override
-	@Nullable
-	public Object invoke(final MethodInvocation invocation) throws Throwable {
-        // ...
-		try {
-			return execute(aopAllianceInvoker, target, method, invocation.getArguments());
-		}
-
-	}
-
+  @Override
+  @Nullable
+  public Object invoke(final MethodInvocation invocation) throws Throwable {
+    // ...
+    try {
+      return execute(aopAllianceInvoker, target, method, invocation.getArguments());
+    }
+  }
 }
-
 ```
 
 ### **CacheAspectSupport 执行具体的增强方法**
@@ -130,7 +127,7 @@ private Object execute(final CacheOperationInvoker invoker, Method method, Cache
 
 ```java
 private void processCacheEvicts(
-    Collection<CacheOperationContext> contexts, boolean beforeInvocation, @Nullable Object result) {
+  Collection<CacheOperationContext> contexts, boolean beforeInvocation, @Nullable Object result) {
 
   for (CacheOperationContext context : contexts) {
     CacheEvictOperation operation = (CacheEvictOperation) context.metadata.operation;
@@ -141,7 +138,7 @@ private void processCacheEvicts(
 }
 
 private void performCacheEvict(
-    CacheOperationContext context, CacheEvictOperation operation, @Nullable Object result) {
+  CacheOperationContext context, CacheEvictOperation operation, @Nullable Object result) {
 
   Object key = null;
   for (Cache cache : context.getCaches()) {
