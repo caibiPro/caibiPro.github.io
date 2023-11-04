@@ -1,4 +1,12 @@
-# 理解Android消息系统：Handler, Looper, Message， Message-Queue
+---
+title: 理解Android消息系统：Handler, Looper, Message， Message-Queue
+author: mingqing
+date: 2023-11-04 17:19:00 +0800
+categories: [Android]
+tags: [android, handler, thread]
+math: true
+mermaid: true
+---
 
 ## Android中的线程
 
@@ -41,7 +49,7 @@
 1. **线程内部相对封闭的运行系统** : 整个 Looper 线程内部是一个封闭运行的系统 , Looper 一直不停的再遍历 MessageQueue , 将 消息 或 操作 取出 , 交给 Handler 执行 ;
 2. **线程交互** : Handler 还有另外一个职责就是负责与外部线程的交互 , 在外部线程中调用 Handler 将消息回传给本 Looper 线程 , 放入 MessageQueue 队列中 ;
 
-### Looper
+## Looper
 
 A Looper is responsible for managing a thread’s message queue. It processes messages in the order they’re received and dispatches them to the appropriate Handler. A Looper is usually associated with a single thread, and each thread can have at most one Looper.
 
@@ -52,7 +60,7 @@ A Looper is responsible for managing a thread’s message queue. It processes me
 3. 新开一个线程是默认是没有Looper的。但是也可以给它加一个Looper，有了Looper这个线程就可以进行消息处理了。
 4. 在同一个app中，其它线程可以取的主线程的Looper，这样就可以实现子线程和主线程之间的通信。
 
-#### 创建Looper
+### 创建Looper
 
 Looper的字面意思是“循环者”，它被设计用来使一个普通线程变成**Looper线程**。所谓Looper线程就是循环工作的线程。在程序开发中（尤其是GUI开发中），我们经常会需要一个线程不断循环，一旦有新任务则执行，执行完继续等待下一个任务，这就是Looper线程。使用Looper类创建Looper线程很简单：
 
@@ -131,7 +139,7 @@ public class LooperThread extends Thread {
 }
 ```
 
-#### Looper.prepare()
+### Looper.prepare()
 
 ![Image.png](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/B2732B49-8A5E-4FD0-BB9E-076617BE7A86/56D977E5-3073-4CDE-94E0-531A82E602E9_2/nL5zGI7C6ZEi8OyobxrqdmVQ0UM4XRhT0KyZt2Co7P0z/Image.png)
 
@@ -167,7 +175,7 @@ publicclass Looper {
 }
 ```
 
-#### Looper.loop()
+### Looper.loop()
 
 ![Image.png](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/B2732B49-8A5E-4FD0-BB9E-076617BE7A86/A48DBC76-B1E8-484D-8F61-DD77419EFA4A_2/rYBCqlAfBKw4XXcxOUNCgNb5MGxChTaxeyFeeQXMCsoz/Image.png)
 
@@ -220,7 +228,7 @@ public static final void loop(){
 
 除了prepare()和loop()方法，Looper类还提供了一些有用的方法，比如
 
-#### Looper.myLooper()
+### Looper.myLooper()
 
 获取了与当前线程关联的 Looper
 
@@ -231,7 +239,7 @@ public static final Looper myLooper() {
 }
 ```
 
-#### getThread()
+### getThread()
 
 得到looper对象所属线程：
 
@@ -241,7 +249,7 @@ public Thread getThread() {
 }
 ```
 
-#### quit()
+### quit()
 
 结束looper循环：
 
@@ -254,7 +262,7 @@ public void quit() {
 }
 ```
 
-### Handler
+## Handler
 
 A Handler is a class that is responsible for processing messages and running them on the appropriate thread. A Handler can be associated with a specific thread and can post messages to that thread’s message queue. Handlers are often used in Android to update the UI from a background thread.
 
@@ -322,7 +330,7 @@ public class LooperThread extends Thread {
 
 ![Image.png](https://res.craft.do/user/full/5dbbba6d-7cd5-7f7a-23e0-93b375d4df25/doc/B2732B49-8A5E-4FD0-BB9E-076617BE7A86/A73040A6-DBE2-4602-A8E2-361C568713A3_2/ySxFrlJ5VzJw06vu6bYHCrWLBvYYewakBx4TXEkFgIgz/Image.png)
 
-#### 创建Handler
+### 创建Handler
 
 创建了一个与当前线程关联的新 Handler 对象
 
@@ -330,7 +338,7 @@ public class LooperThread extends Thread {
 Handler handler = new Handler();
 ```
 
-#### Handler发送消息
+### Handler发送消息
 
 有了handler之后，我们就可以使用下列方法向MQ上发送消息了：
 
@@ -384,9 +392,9 @@ public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
 msg.target.dispatchMessage(msg);
 ```
 
-1. post发出的message，其callback为Runnable对象
+2. post发出的message，其callback为Runnable对象
 
-#### Handler处理消息
+### Handler处理消息
 
 说完了消息的发送，再来看下handler如何处理消息。消息的处理是通过核心方法`dispatchMessage(Message msg)` 与钩子方法 `handleMessage(Message msg)` 完成的：
 
@@ -420,7 +428,7 @@ public void handleMessage(Message msg){}
 
 可以看到，除了[`handleMessage`](http://developer.android.com/reference/android/os/Handler.html#handleMessage%28android.os.Message%29)`(`[`Message`](http://developer.android.com/reference/android/os/Message.html)` msg)`和Runnable对象的run方法由开发者实现外（实现具体逻辑），handler的内部工作机制对开发者是透明的。这正是handler API设计的精妙之处！
 
-#### Handler的用处
+### Handler的用处
 
 Handler拥有下面两个重要的特点：
 
@@ -546,7 +554,7 @@ public class SampleTask implements Runnable {
 
 当然，handler能做的远远不仅如此，由于它能post Runnable对象，它还能与Looper配合实现经典的Pipeline Thread(流水线线程)模式。请参考此文[《Android Guts: Intro to Loopers and Handlers》](http://mindtherobot.com/blog/159/android-guts-intro-to-loopers-and-handlers/)
 
-### Message
+## Message
 
 在整个消息处理机制中，message又叫task，封装了任务携带的信息和处理该任务的handler。message的用法比较简单，这里不做总结了。但是有这么几点需要注意（待补充）：
 
@@ -554,13 +562,13 @@ public class SampleTask implements Runnable {
 2. 如果你的message只需要携带简单的int信息，请优先使用`Message.arg1`和`Message.arg2`来传递信息，这比用Bundle更省内存
 3. 擅用`message.what`来标识信息，以便用不同方式处理message。
 
-### MessageQueue
+## MessageQueue
 
 A MessageQueue is responsible for holding messages that are waiting to be processed. Messages are added to the MessageQueue using the Handler’s post() method. The Looper processes messages from the MessageQueue in the order they were added.
 
 MessageQueue MessageQueue 负责保存等待处理的消息。使用 Handler 的 post() 方法将消息添加到 MessageQueue 中。Looper 按照添加消息的顺序处理来自 MessageQueue 的消息。
 
-#### 创建MessageQueue
+### 创建MessageQueue
 
 获取了与当前线程的 Looper 关联的 MessageQueue。
 
